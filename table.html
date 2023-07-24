@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Virtual Scrolling Demo</title>
+    <!-- Include Lightstreamer client library -->
+    <script src="http://www.lightstreamer.com/dist/latest/lightstreamer.min.js"></script>
+</head>
+<body>
+    <div id="stock-table"></div>
+    <div id="slider">
+        <!-- The slider to control the virtual scrolling -->
+    </div>
+
+    <script>
+        // Function to render the table with the current visible items
+        function renderTable(items) {
+            const tableDiv = document.getElementById('stock-table');
+            tableDiv.innerHTML = ''; // Clear the existing table
+
+            const table = document.createElement('table');
+            table.setAttribute('border', '1');
+
+            // Add header row
+            const headerRow = document.createElement('tr');
+            headerRow.innerHTML = '<th>Item</th><th>Value</th>';
+            table.appendChild(headerRow);
+
+            // Add data rows
+            for (const item of items) {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${item.name}</td><td>${item.value}</td>`;
+                table.appendChild(row);
+            }
+
+            tableDiv.appendChild(table);
+        }
+
+        // Function to subscribe to new items based on the current slider position
+        function updateSubscriptions(startIndex) {
+            // Calculate the visible items based on the slider position
+            const visibleItems = stockItems.slice(startIndex, startIndex + 5);
+
+            // Unsubscribe from all previous subscriptions
+            for (const subscription of subscriptions) {
+                subscription.unsubscribe();
+            }
+
+            // Subscribe to the visible items (one row per subscription)
+            subscriptions = visibleItems.map(item => {
+                const subscription = new Lightstreamer.Subscription('MERGE', 'stock_data', ['value']);
+                subscription.setItems([item.name]);
+                subscription.addListener({
+                    onItemUpdate: function (update) {
+                        // Update the value of the subscribed item
+                        const item = stockItems.find(i => i.name === update.getItemName());
+                        item.value = update.getValue('value');
+                        renderTable(visibleItems); // Re-render the table with updated values
+                    }
+                });
+                lsClient.subscribe(subscription);
+                return subscription;
+            });
+        }
+
+        // Sample data - replace this with your actual data
+        const stockItems = [
+            { name: 'item1', value: 100 },
+            { name: 'item2', value: 200 },
+            { name: 'item3', value: 150 },
+            { name: 'item4', value: 120 },
+            { name: 'item5', value: 180 },
+            // Add more items here...
+            { name: 'item30', value: 300 }
+        ];
+
+        // Initialize Lightstreamer client
+        const lsClient = new Lightstreamer.LightstreamerClient('http://localhost:8080', 'DEMO');
+        lsClient.connect();
+
+        let subscriptions = []; // Store active subscriptions
+
+        // Set up the initial table with the first five items
+        renderTable(stockItems.slice(0, 5));
+
+        // Set up the slider (assuming you have a way to get the slider position)
+        const slider = document.getElementById('slider');
+        slider.addEventListener('change', () => {
+            const sliderValue = parseInt(slider.value);
+            updateSubscriptions(sliderValue);
+        });
+
+        // Initialize subscriptions with the initial visible items
+        updateSubscriptions(0);
+    </script>
+</body>
+</html>

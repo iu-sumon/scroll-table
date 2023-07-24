@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scrolling Table with Fixed Viewport</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+
+      /* Define the height of the table rows */
+      td {
+        height: 40px;
+      }
+
+      /* Define the height of the table header */
+      th {
+        height: 50px;
+      }
+
+      /* Define the height of the viewport */
+      #viewport {
+        height: 240px;
+        overflow-y: auto; /* Add vertical scrollbar */
+      }
+      .slider-container {
+        display: flex;
+        align-items: center;
+      }
+
+      #slider {
+        width: 300px;
+        margin-right: 10px;
+      }
+
+      #slider-value {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viewport">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+    <div class="slider-container">
+      <input type="range" id="slider" min="0" max="100" value="0" step="1" />
+      <span id="slider-value">0</span>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
